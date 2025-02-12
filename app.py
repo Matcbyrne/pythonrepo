@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html")  # Loads the chat UI
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -13,7 +13,7 @@ def chat():
     if not user_input:
         return jsonify({"error": "Message is required"}), 400
 
-    # Simulated Groq response (replace this with actual Groq API logic)
+    # Simulated chatbot response (replace with actual Groq API call)
     response = {"response": f"Groq says: '{user_input}'"}
     return jsonify(response)
 
