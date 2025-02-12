@@ -4,35 +4,55 @@ from typing import List
 from groq import Groq
 import instructor
 
-class TopicInfo(BaseModel):
-    title: str
-    details: List[str] = Field(..., description="A list of details about the topic")
+class Response(BaseModel):
+    answer: str = Field(..., description="The answer to the user's question")
 
-def get_topic_from_user():
-    return input("Enter a topic to learn about (or 'exit' to quit): ")
-
-def fetch_topic_details(topic):
-    api_key = os.environ.get("GROQ_API_KEY")
-
-    # Debugging step: Print the API key (remove in production)
-    if api_key is None:
-        print("Error: The GROQ_API_KEY environment variable is not set.")
-        print("Make sure to set it using 'export GROQ_API_KEY=your_api_key_here' or 'set GROQ_API_KEY=your_api_key_here' for Windows.")
-        return
-
-    groq_client = Groq(api_key=api_key)
-    groq_client = instructor.from_groq(groq_client, mode=instructor.Mode.TOOLS)
-
-    response = groq_client.chat.completions.create(
-        model="mixtral-8x7b-32768",
-        messages=[{"role": "user", "content": f"Tell me about {topic}"}],
-        response_model=TopicInfo,
+def get_groq_response(question: str) -> str:
+    # Initialize Groq client
+    client = Groq(
+        api_key=os.environ.get('GROQ_API_KEY'),
     )
-    print(response.model_dump_json(indent=2))
+    
+    # Enable instructor integration
+    client = instructor.from_groq(client, mode=instructor.Mode.TOOLS)
+    
+    # Make API call
+    resp = client.chat.completions.create(
+        model="mixtral-8x7b-32768",
+        messages=[
+            {
+                "role": "user",
+                "content": question,
+            }
+        ],
+        response_model=Response,
+    )
+    return resp.answer
+
+def main():
+    # Check for API key
+    if not os.environ.get('GROQ_API_KEY'):
+        print("Please set your GROQ_API_KEY environment variable")
+        return
+    
+    print("Welcome to Groq Chat! Type 'quit' to exit.")
+    
+    # Main conversation loop
+    while True:
+        # Get user input
+        question = input("\nYou: ")
+        
+        # Check for quit command
+        if question.lower() == 'quit':
+            print("Goodbye!")
+            break
+            
+        try:
+            # Get and print response
+            response = get_groq_response(question)
+            print(f"\nGroq: {response}")
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
-    while True:
-        user_topic = get_topic_from_user()
-        if user_topic.lower() == 'exit':
-            break
-        fetch_topic_details(user_topic)
+    main()
