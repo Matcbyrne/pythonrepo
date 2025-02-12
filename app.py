@@ -9,7 +9,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise ValueError("Error: Please set your GROQ_API_KEY environment variable.")
 
-# ✅ Correct API URL
+# ✅ Correct Groq API URL
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 def ask_groq(question):
@@ -47,4 +47,3 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
