@@ -1,58 +1,48 @@
 import os
-from pydantic import BaseModel, Field
-from typing import List
-from groq import Groq
-import instructor
+import requests
+from flask import Flask, request, jsonify
 
-class Response(BaseModel):
-    answer: str = Field(..., description="The answer to the user's question")
+app = Flask(__name__)
 
-def get_groq_response(question: str) -> str:
-    # Initialize Groq client
-    client = Groq(
-        api_key=os.environ.get('GROQ_API_KEY'),
-    )
-    
-    # Enable instructor integration
-    client = instructor.from_groq(client, mode=instructor.Mode.TOOLS)
-    
-    # Make API call
-    resp = client.chat.completions.create(
-        model="mixtral-8x7b-32768",
-        messages=[
-            {
-                "role": "user",
-                "content": question,
-            }
-        ],
-        response_model=Response,
-    )
-    return resp.answer
+# Load API Key
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise ValueError("Error: Please set your GROQ_API_KEY environment variable.")
 
-def main():
-    # Check for API key
-    if not os.environ.get('GROQ_API_KEY'):
-        print("Please set your GROQ_API_KEY environment variable")
-        return
+API_URL = "https://api.groq.com/v1/chat/completions"
+
+def ask_groq(question):
+    """ Send user input to Groq API and return the response """
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "mixtral-8x7b-32768",
+        "messages": [{"role": "user", "content": question}],
+        "temperature": 0.7
+    }
+
+    response = requests.post(API_URL, json=data, headers=headers)
     
-    print("Welcome to Groq Chat! Type 'quit' to exit.")
-    
-    # Main conversation loop
-    while True:
-        # Get user input
-        question = input("\nYou: ")
-        
-        # Check for quit command
-        if question.lower() == 'quit':
-            print("Goodbye!")
-            break
-            
-        try:
-            # Get and print response
-            response = get_groq_response(question)
-            print(f"\nGroq: {response}")
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        return f"Error: {response.json()}"
+
+@app.route("/")
+def home():
+    return "Groq Chatbot API is running! Use /chat endpoint to send messages."
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message", "")
+    if not user_input:
+        return jsonify({"error": "Message is required"}), 400
+
+    response = ask_groq(user_input)
+    return jsonify({"response": response})
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000, debug=True)
