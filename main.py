@@ -1,58 +1,21 @@
+from flask import Flask, request, render_template, jsonify
 import os
-from pydantic import BaseModel, Field
-from typing import List
-from groq import Groq
-import instructor
 
-class Response(BaseModel):
-    answer: str = Field(..., description="The answer to the user's question")
+app = Flask(__name__)
 
-def get_groq_response(question: str) -> str:
-    # Initialize Groq client
-    client = Groq(
-        api_key=os.environ.get('GROQ_API_KEY'),
-    )
-    
-    # Enable instructor integration
-    client = instructor.from_groq(client, mode=instructor.Mode.TOOLS)
-    
-    # Make API call
-    resp = client.chat.completions.create(
-        model="mixtral-8x7b-32768",
-        messages=[
-            {
-                "role": "user",
-                "content": question,
-            }
-        ],
-        response_model=Response,
-    )
-    return resp.answer
+@app.route("/")
+def home():
+    return render_template("index.html")  # Loads the chat UI
 
-def main():
-    # Check for API key
-    if not os.environ.get('GROQ_API_KEY'):
-        print("Please set your GROQ_API_KEY environment variable")
-        return
-    
-    print("Welcome to Groq Chat! Type 'quit' to exit.")
-    
-    # Main conversation loop
-    while True:
-        # Get user input
-        question = input("\nYou: ")
-        
-        # Check for quit command
-        if question.lower() == 'quit':
-            print("Goodbye!")
-            break
-            
-        try:
-            # Get and print response
-            response = get_groq_response(question)
-            print(f"\nGroq: {response}")
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message", "")
+    if not user_input:
+        return jsonify({"error": "Message is required"}), 400
+
+    # Simulating a response from Groq (Replace this with actual API logic)
+    response = {"response": f"Groq says: '{user_input}'"}
+    return jsonify(response)
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000)
