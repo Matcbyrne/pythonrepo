@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, jsonify
-import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 @app.route("/")
 def home():
-    return render_template("index.html")  # Loads the chat UI
+    return render_template("index.html")  # Ensure index.html is inside a "templates" folder
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -13,7 +12,7 @@ def chat():
     if not user_input:
         return jsonify({"error": "Message is required"}), 400
 
-    # Simulated chatbot response (replace with actual Groq API call)
+    # Simulated chatbot response (Replace with real Groq API call)
     response = {"response": f"Groq says: '{user_input}'"}
     return jsonify(response)
 
