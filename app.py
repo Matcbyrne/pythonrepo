@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
+import os
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
-    return "Groq Chatbot is running!"
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -12,16 +13,9 @@ def chat():
     if not user_input:
         return jsonify({"error": "Message is required"}), 400
 
-    # Simulating a response from Groq (Replace with real API logic)
+    # Simulated Groq response (replace this with actual Groq API logic)
     response = {"response": f"Groq says: '{user_input}'"}
     return jsonify(response)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
-from flask import render_template
-
-@app.route("/ui")
-def ui():
-    return render_template("index.html")
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
