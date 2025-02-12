@@ -30,10 +30,7 @@
             });
 
             let result = await response.json();
-
-            // Ensure the correct field is displayed
-            let botMessage = result.response || "Error: No response from API";
-            document.getElementById("chatbox").innerHTML += "<p><b>Groq:</b> " + botMessage + "</p>";
+            document.getElementById("chatbox").innerHTML += "<p><b>Groq:</b> " + result.response + "</p>";
         }
     </script>
 </body>
