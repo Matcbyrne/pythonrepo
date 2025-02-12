@@ -1,48 +1,23 @@
-import os
-import requests
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit, send
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
-# Load API key from environment variable
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise ValueError("Error: Please set your GROQ_API_KEY environment variable.")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-API_URL = "https://api.groq.com/v1/chat/completions"
+@socketio.on('message')
+def handle_message(message):
+    print('received message: ' + message)
+    send(message, broadcast=True)
 
-def ask_groq(question):
-    """ Send user question to Groq API and return the response. """
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    send('Connected to the server!', broadcast=True)
 
-    data = {
-        "model": "mixtral-8x7b-32768",  # Adjust if needed
-        "messages": [{"role": "user", "content": question}],
-        "temperature": 0.7
-    }
-
-    response = requests.post(API_URL, json=data, headers=headers)
-
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        return f"Error: {response.json()}"
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "")
-    if not user_input:
-        return jsonify({"error": "Message is required"}), 400
-
-    response = ask_groq(user_input)
-    return jsonify({"response": response})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
