@@ -1,8 +1,12 @@
 import os
 import requests
 from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
 
 app = Flask(__name__, template_folder="templates")
+
+# Load .env file
+load_dotenv()
 
 # Load API Key
 GROQ_API_KEY = os.getenv("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")
