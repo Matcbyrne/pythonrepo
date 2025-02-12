@@ -12,7 +12,7 @@ class Response(BaseModel):
 def get_groq_response(question: str) -> str:
     # Initialize Groq client
     client = Groq(
-        api_key=os.environ.get('GROQ_API_KEY'),
+        api_key=os.environ.get('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'),
     )
    
     # Enable instructor integration
