@@ -1,36 +1,48 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Groq Chatbot</title>
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        input { width: 60%; padding: 10px; margin-top: 10px; }
-        button { padding: 10px; cursor: pointer; }
-        #chatbox { margin-top: 20px; text-align: left; max-width: 600px; margin: auto; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
     </style>
 </head>
 <body>
-    <h1>Groq Chatbot</h1>
-    <div id="chatbox"></div>
-    <input type="text" id="userInput" placeholder="Type your message...">
+    <ul id="messages"></ul>
+    <input id="nickname" type="text" placeholder="Enter your nickname">
+    <input id="message" type="text" placeholder="Enter your message">
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        async function sendMessage() {
-            let message = document.getElementById("userInput").value;
-            document.getElementById("chatbox").innerHTML += "<p><b>You:</b> " + message + "</p>";
-            document.getElementById("userInput").value = "";
+        var socket = io();
+        var nickname = '';
 
-            let response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message })
-            });
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
 
-            let result = await response.json();
-            document.getElementById("chatbox").innerHTML += "<p><b>Groq:</b> " + result.response + "</p>";
+        socket.on('message', function(msg) {
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode(msg));
+            document.getElementById('messages').appendChild(li);
+        });
+
+        function sendMessage() {
+            var nickInput = document.getElementById('nickname');
+            var msgInput = document.getElementById('message');
+            
+            if (!nickname) {
+                nickname = nickInput.value || 'Anonymous';
+                nickInput.disabled = true;
+            }
+            
+            if (msgInput.value) {
+                socket.emit('message', nickname + ': ' + msgInput.value);
+                msgInput.value = '';
+            }
         }
     </script>
 </body>
