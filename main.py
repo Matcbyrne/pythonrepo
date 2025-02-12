@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__, template_folder="templates")
 
 # Load API Key
-GROQ_API_KEY = os.getenv("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")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise ValueError("Error: Please set your GROQ_API_KEY environment variable.")
 
