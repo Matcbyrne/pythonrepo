@@ -14,8 +14,10 @@ def get_topic_from_user():
 def fetch_topic_details(topic):
     api_key = os.environ.get("GROQ_API_KEY")
 
-    if not api_key:
-        print("Error: GROQ_API_KEY environment variable is not set. Please set it and try again.")
+    # Debugging step: Print the API key (remove in production)
+    if api_key is None:
+        print("Error: The GROQ_API_KEY environment variable is not set.")
+        print("Make sure to set it using 'export GROQ_API_KEY=your_api_key_here' or 'set GROQ_API_KEY=your_api_key_here' for Windows.")
         return
 
     groq_client = Groq(api_key=api_key)
