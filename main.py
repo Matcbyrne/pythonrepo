@@ -12,22 +12,18 @@ def get_topic_from_user():
     return input("Enter a topic to learn about (or 'exit' to quit): ")
 
 def fetch_topic_details(topic):
-    groq_client = Groq(
-        api_key=os.environ.get(
-            os.environ.get("GROQ_API_KEY"),
-        ),
-    )
+    api_key = os.environ.get("GROQ_API_KEY")
 
+    if not api_key:
+        print("Error: GROQ_API_KEY environment variable is not set. Please set it and try again.")
+        return
+
+    groq_client = Groq(api_key=api_key)
     groq_client = instructor.from_groq(groq_client, mode=instructor.Mode.TOOLS)
 
     response = groq_client.chat.completions.create(
         model="mixtral-8x7b-32768",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Tell me about {topic}",
-            }
-        ],
+        messages=[{"role": "user", "content": f"Tell me about {topic}"}],
         response_model=TopicInfo,
     )
     print(response.model_dump_json(indent=2))
