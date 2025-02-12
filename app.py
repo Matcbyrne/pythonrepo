@@ -5,11 +5,11 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__, template_folder="templates")
 
 # Load API Key
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("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")
 if not GROQ_API_KEY:
     raise ValueError("Error: Please set your GROQ_API_KEY environment variable.")
 
-# ✅ Correct Groq API URL
+# ✅ Correct API URL
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 def ask_groq(question):
@@ -20,7 +20,7 @@ def ask_groq(question):
     }
 
     data = {
-        "model": "mixtral-8x7b-32768",
+        "model": "mixtral-8x7b-32768",  # Use the correct model name
         "messages": [{"role": "user", "content": question}],
         "temperature": 0.7
     }
