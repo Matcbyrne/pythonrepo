@@ -1,1 +1,4 @@
+groq
+instructor
+pydantic
 
