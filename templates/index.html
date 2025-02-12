@@ -1,48 +1,39 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Room</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groq Chatbot</title>
     <style>
-        #messages { list-style-type: none; margin: 0; padding: 0; }
-        #messages li { padding: 5px 10px; }
-        #messages li:nth-child(odd) { background: #eee; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input { width: 60%; padding: 10px; margin-top: 10px; }
+        button { padding: 10px; cursor: pointer; }
+        #chatbox { margin-top: 20px; text-align: left; max-width: 600px; margin: auto; }
     </style>
 </head>
 <body>
-    <ul id="messages"></ul>
-    <input id="nickname" type="text" placeholder="Enter your nickname">
-    <input id="message" type="text" placeholder="Enter your message">
+    <h1>Groq Chatbot</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your message...">
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        var socket = io();
-        var nickname = '';
+        async function sendMessage() {
+            let message = document.getElementById("userInput").value;
+            document.getElementById("chatbox").innerHTML += "<p><b>You:</b> " + message + "</p>";
+            document.getElementById("userInput").value = "";
 
-        socket.on('connect', function() {
-            console.log('Connected to server');
-        });
+            let response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            });
 
-        socket.on('message', function(msg) {
-            var li = document.createElement('li');
-            li.appendChild(document.createTextNode(msg));
-            document.getElementById('messages').appendChild(li);
-        });
+            let result = await response.json();
 
-        function sendMessage() {
-            var nickInput = document.getElementById('nickname');
-            var msgInput = document.getElementById('message');
-            
-            if (!nickname) {
-                nickname = nickInput.value || 'Anonymous';
-                nickInput.disabled = true;
-            }
-            
-            if (msgInput.value) {
-                socket.emit('message', nickname + ': ' + msgInput.value);
-                msgInput.value = '';
-            }
+            // Ensure the correct field is displayed
+            let botMessage = result.response || "Error: No response from API";
+            document.getElementById("chatbox").innerHTML += "<p><b>Groq:</b> " + botMessage + "</p>";
         }
     </script>
 </body>
