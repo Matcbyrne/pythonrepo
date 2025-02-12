@@ -1,8 +1,8 @@
 import os
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 # Load API Key
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -25,7 +25,7 @@ def ask_groq(question):
     }
 
     response = requests.post(API_URL, json=data, headers=headers)
-    
+
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]
     else:
@@ -33,7 +33,7 @@ def ask_groq(question):
 
 @app.route("/")
 def home():
-    return "Groq Chatbot API is running! Use /chat endpoint to send messages."
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
