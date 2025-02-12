@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Groq Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input { width: 60%; padding: 10px; margin-top: 10px; }
+        button { padding: 10px; cursor: pointer; }
+        #chatbox { margin-top: 20px; text-align: left; }
+    </style>
 </head>
 <body>
     <h1>Groq Chatbot</h1>
-    <input type="text" id="userInput" placeholder="Type your message">
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your message here...">
     <button onclick="sendMessage()">Send</button>
-    <p id="response"></p>
 
     <script>
         async function sendMessage() {
             let message = document.getElementById("userInput").value;
+            document.getElementById("chatbox").innerHTML += "<p><b>You:</b> " + message + "</p>";
+            document.getElementById("userInput").value = "";
+
             let response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message })
             });
+
             let result = await response.json();
-            document.getElementById("response").innerText = result.response;
+            document.getElementById("chatbox").innerHTML += "<p><b>Groq:</b> " + result.response + "</p>";
         }
     </script>
 </body>
 </html>
-
